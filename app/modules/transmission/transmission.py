@@ -130,7 +130,7 @@ class Transmission:
             logger.error(f"获取正在下载的种子列表出错：{str(err)}")
             return None
 
-    def set_torrent_tag(self, ids: str, tags: list, org_tags: list = None) -> bool:
+    def set_torrents_tag(self, ids: str, tags: list, org_tags: list = None) -> bool:
         """
         设置种子标签，注意TR默认会覆盖原有标签，如需追加需传入原有标签
         """

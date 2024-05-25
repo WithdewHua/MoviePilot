@@ -126,10 +126,10 @@ class TransmissionModule(_ModuleBase):
                                       for tag in torrent.labels] if hasattr(torrent, "labels") else []
                             if "已整理" in labels:
                                 labels.remove("已整理")
-                                self.transmission.set_torrent_tag(ids=torrent_hash, tags=labels)
+                                self.transmission.set_torrents_tag(ids=torrent_hash, tags=labels)
                             if settings.TORRENT_TAG and settings.TORRENT_TAG not in labels:
                                 labels.append(settings.TORRENT_TAG)
-                                self.transmission.set_torrent_tag(ids=torrent_hash, tags=labels)
+                                self.transmission.set_torrents_tag(ids=torrent_hash, tags=labels)
                         return torrent_hash, f"下载任务已存在"
             return None, f"添加种子任务失败：{content}"
         else:
@@ -249,7 +249,7 @@ class TransmissionModule(_ModuleBase):
             tags = org_tags + ['已整理']
         else:
             tags = ['已整理']
-        self.transmission.set_torrent_tag(ids=hashs, tags=tags)
+        self.transmission.set_torrents_tag(ids=hashs, tags=tags)
         # 移动模式删除种子
         if settings.TRANSFER_TYPE in ["move", "rclone_move"]:
             if self.remove_torrents(hashs):
