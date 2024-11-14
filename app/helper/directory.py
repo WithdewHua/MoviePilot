@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from app import schemas
+from app.core.config import settings
 from app.core.context import MediaInfo
 from app.db.systemconfig_oper import SystemConfigOper
 from app.schemas.types import SystemConfigKey
@@ -67,8 +68,11 @@ class DirectoryHelper:
         dirs = self.get_dirs()
         # 按照配置顺序查找
         for d in dirs:
-            # 没有启用整理的目录
-            if not d.monitor_type:
+            # 对于需要自动整理的，跳过没有启用整理的目录
+            if settings.MONITOR_ENABLE and not d.monitor_type:
+                continue
+            # 对于不需要自动整理的，跳过启用了整理的目录
+            if not settings.MONITOR_ENABLE and d.monitor_type:
                 continue
             # 存储类型不匹配
             if storage and d.storage != storage:
@@ -76,7 +80,7 @@ class DirectoryHelper:
             # 下载目录
             download_path = Path(d.download_path)
             # 媒体库目录
-            library_path = Path(d.library_path)
+            library_path = Path(d.library_path) if d.library_path else None
             # 有源目录时，源目录不匹配下载目录
             if src_path and not src_path.is_relative_to(download_path):
                 continue
@@ -84,7 +88,7 @@ class DirectoryHelper:
             if fileitem and not Path(fileitem.path).is_relative_to(download_path):
                 continue
             # 有目标目录时，目标目录不匹配媒体库目录
-            if dest_path and not dest_path.is_relative_to(library_path):
+            if dest_path and (not library_path or not dest_path.is_relative_to(library_path)):
                 continue
             # 目录类型为全部的，符合条件
             if not d.media_type:
