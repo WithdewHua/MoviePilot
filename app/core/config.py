@@ -159,6 +159,8 @@ class ConfigModel(BaseModel):
     TORRENT_TAG: str = "MOVIEPILOT"
     # 下载站点字幕
     DOWNLOAD_SUBTITLE: bool = True
+    # 启用自动整理
+    MONITOR_ENABLE: bool = False
     # 交互搜索自动下载用户ID，使用,分割
     AUTO_DOWNLOAD_USER: Optional[str] = None
     # CookieCloud是否启动本地服务
