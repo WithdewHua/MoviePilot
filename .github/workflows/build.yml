@@ -28,7 +28,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/moviepilot-v2
+          images: ${{ secrets.DOCKER_USERNAME }}/moviepilot-v2-ui
           tags: |
             type=raw,value=${{ env.app_version }}
             type=raw,value=latest
@@ -62,15 +62,15 @@ jobs:
       - name: Delete Release
         uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
-          tag_name: ${{ env.app_version }}
+          tag_name: ${{ env.app_version }}-ui
           delete_release: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.app_version }}
-          name: v${{ env.app_version }}
+          tag_name: v${{ env.app_version }}-ui
+          name: v${{ env.app_version }}-ui
           draft: false
           prerelease: false
           make_latest: false
