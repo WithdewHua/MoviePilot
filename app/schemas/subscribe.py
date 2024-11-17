@@ -72,6 +72,8 @@ class Subscribe(BaseModel):
     media_category: Optional[str] = None
     # 过滤规则组
     filter_groups: Optional[List[str]] = []
+    # 整理类型
+    monitor_type: Optional[str] = None
 
     class Config:
         orm_mode = True

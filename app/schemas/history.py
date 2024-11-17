@@ -46,6 +46,8 @@ class DownloadHistory(BaseModel):
     date: Optional[str] = None
     # 备注
     note: Optional[Any] = None
+    # 整理类型
+    monitor_type: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -90,6 +92,8 @@ class TransferHistory(BaseModel):
     errmsg: Optional[str] = None
     # 日期
     date: Optional[str] = None
+    # 整理类型
+    monitor_type: Optional[str] = None
 
     class Config:
         orm_mode = True
