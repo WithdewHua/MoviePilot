@@ -208,7 +208,8 @@ class DownloadChain(ChainBase):
                         save_path: str = None,
                         userid: Union[str, int] = None,
                         username: str = None,
-                        media_category: str = None) -> Optional[str]:
+                        media_category: str = None,
+                        monitor_type: Optional[str] = None,) -> Optional[str]:
         """
         下载及发送通知
         :param context: 资源上下文
@@ -221,6 +222,7 @@ class DownloadChain(ChainBase):
         :param userid: 用户ID
         :param username: 调用下载的用户名/插件名
         :param media_category: 自定义媒体类别
+        :param monitor_type: 整理类型
         """
         _torrent = context.torrent_info
         _media = context.media_info
@@ -256,7 +258,7 @@ class DownloadChain(ChainBase):
             download_dir = Path(save_path)
         else:
             # 根据媒体信息查询下载目录配置
-            dir_info = self.directoryhelper.get_dir(_media)
+            dir_info = self.directoryhelper.get_dir(_media, monitor_type=monitor_type)
             # 拼装子目录
             if dir_info:
                 # 一级目录
@@ -318,7 +320,8 @@ class DownloadChain(ChainBase):
                 username=username,
                 channel=channel.value if channel else None,
                 date=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-                media_category=media_category
+                media_category=media_category,
+                monitor_type=monitor_type,
             )
 
             # 登记下载文件
@@ -384,7 +387,8 @@ class DownloadChain(ChainBase):
                        userid: str = None,
                        username: str = None,
                        media_category: str = None,
-                       downloader: str = None
+                       downloader: str = None,
+                       monitor_type: Optional[str] = None,
                        ) -> Tuple[List[Context], Dict[Union[int, str], Dict[int, NotExistMediaInfo]]]:
         """
         根据缺失数据，自动种子列表中组合择优下载
@@ -397,6 +401,7 @@ class DownloadChain(ChainBase):
         :param username: 调用下载的用户名/插件名
         :param media_category: 自定义媒体类别
         :param downloader: 下载器
+        :param monitor_type: 整理类型
         :return: 已经下载的资源列表、剩余未下载到的剧集 no_exists[tmdb_id/douban_id] = {season: NotExistMediaInfo}
         """
         # 已下载的项目
@@ -468,7 +473,8 @@ class DownloadChain(ChainBase):
                 logger.info(f"开始下载电影 {context.torrent_info.title} ...")
                 if self.download_single(context, save_path=save_path, channel=channel,
                                         source=source, userid=userid, username=username,
-                                        media_category=media_category, downloader=downloader):
+                                        media_category=media_category, downloader=downloader,
+                                        monitor_type=monitor_type):
                     # 下载成功
                     logger.info(f"{context.torrent_info.title} 添加下载成功")
                     downloaded_list.append(context)
@@ -555,6 +561,7 @@ class DownloadChain(ChainBase):
                                         username=username,
                                         media_category=media_category,
                                         downloader=downloader,
+                                        monitor_type=monitor_type,
                                     )
                             else:
                                 # 下载
@@ -563,7 +570,8 @@ class DownloadChain(ChainBase):
                                                                    channel=channel, source=source,
                                                                    userid=userid, username=username,
                                                                    media_category=media_category,
-                                                                   downloader=downloader)
+                                                                   downloader=downloader,
+                                                                   monitor_type=monitor_type)
 
                             if download_id:
                                 # 下载成功
@@ -635,7 +643,8 @@ class DownloadChain(ChainBase):
                                                                    channel=channel, source=source,
                                                                    userid=userid, username=username,
                                                                    media_category=media_category,
-                                                                   downloader=downloader)
+                                                                   downloader=downloader,
+                                                                   monitor_type=monitor_type)
                                 if download_id:
                                     # 下载成功
                                     logger.info(f"{meta.title} 添加下载成功")
@@ -725,7 +734,8 @@ class DownloadChain(ChainBase):
                                 userid=userid,
                                 username=username,
                                 media_category=media_category,
-                                downloader=downloader
+                                downloader=downloader,
+                                monitor_type=monitor_type,
                             )
                             if not download_id:
                                 continue
@@ -812,7 +822,7 @@ class DownloadChain(ChainBase):
                                                             tmdbid=mediainfo.tmdb_id,
                                                             doubanid=mediainfo.douban_id)
                 if not mediainfo:
-                    logger.error(f"媒体信息识别失败！")
+                    logger.error("媒体信息识别失败！")
                     return False, {}
                 if not mediainfo.seasons:
                     logger.error(f"媒体信息中没有季集信息：{mediainfo.title_year}")

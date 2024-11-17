@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import List, Optional
 
 from app import schemas
-from app.core.config import settings
 from app.core.context import MediaInfo
+from app.core.config import settings
 from app.db.systemconfig_oper import SystemConfigOper
 from app.schemas.types import SystemConfigKey
 
@@ -50,7 +50,8 @@ class DirectoryHelper:
         return [d for d in self.get_library_dirs() if d.library_storage == "local"]
 
     def get_dir(self, media: MediaInfo, storage: str = "local",
-                src_path: Path = None, dest_path: Path = None, fileitem: schemas.FileItem = None
+                src_path: Path = None, dest_path: Path = None, fileitem: schemas.FileItem = None,
+                monitor_type: str = None,
                 ) -> Optional[schemas.TransferDirectoryConf]:
         """
         根据媒体信息获取下载目录、媒体库目录配置
@@ -59,6 +60,7 @@ class DirectoryHelper:
         :param src_path: 源目录，有值时直接匹配
         :param dest_path: 目标目录，有值时直接匹配
         :param fileitem: 文件项，使用文件路径匹配
+        :param monitor_type: 整理类型，unorganize/manual/downloader/monitor
         """
         # 处理类型
         if not media:
@@ -66,13 +68,11 @@ class DirectoryHelper:
         # 电影/电视剧
         media_type = media.type.value
         dirs = self.get_dirs()
+        monitor_type = monitor_type or settings.MONITOR_TYPE
         # 按照配置顺序查找
         for d in dirs:
-            # 对于需要自动整理的，跳过没有启用整理的目录
-            if settings.MONITOR_ENABLE and not d.monitor_type:
-                continue
-            # 对于不需要自动整理的，跳过启用了整理的目录
-            if not settings.MONITOR_ENABLE and d.monitor_type:
+            # 整理类型不一致的目录
+            if monitor_type != d.monitor_type:
                 continue
             # 存储类型不匹配
             if storage and d.storage != storage:
