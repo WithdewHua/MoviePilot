@@ -114,7 +114,7 @@ class SubscribeChain(ChainBase):
                                                      bangumiid=mediainfo.bangumi_id,
                                                      cache=False)
                     if not mediainfo:
-                        logger.error(f"媒体信息识别失败！")
+                        logger.error("媒体信息识别失败！")
                         return None, "媒体信息识别失败"
                     if not mediainfo.seasons:
                         logger.error(f"媒体信息中没有季集信息，标题：{title}，tmdbid：{tmdbid}，doubanid：{doubanid}")
@@ -162,7 +162,9 @@ class SubscribeChain(ChainBase):
             'downloader': self.__get_default_subscribe_config(mediainfo.type, "downloader") if not kwargs.get(
                 "downloader") else kwargs.get("downloader"),
             'save_path': self.__get_default_subscribe_config(mediainfo.type, "save_path") if not kwargs.get(
-                "save_path") else kwargs.get("save_path")
+                "save_path") else kwargs.get("save_path"),
+            'monitor_type': self.__get_default_subscribe_config(mediainfo.type, "monitor_type") if not kwargs.get(
+                "monitor_type") else kwargs.get("monitor_type"),
         })
         sid, err_msg = self.subscribeoper.add(mediainfo=mediainfo, season=season, username=username, **kwargs)
         if not sid:
@@ -398,6 +400,7 @@ class SubscribeChain(ChainBase):
                 save_path=subscribe.save_path,
                 media_category=subscribe.media_category,
                 downloader=subscribe.downloader,
+                monitor_type=subscribe.monitor_type,
             )
 
             # 判断是否应完成订阅
@@ -777,7 +780,8 @@ class SubscribeChain(ChainBase):
                                                                  username=subscribe.username,
                                                                  save_path=subscribe.save_path,
                                                                  media_category=subscribe.media_category,
-                                                                 downloader=subscribe.downloader)
+                                                                 downloader=subscribe.downloader,
+                                                                 monitor_type=subscribe.monitor_type)
             # 判断是否要完成订阅
             self.finish_subscribe_or_not(subscribe=subscribe, meta=meta, mediainfo=mediainfo,
                                          downloads=downloads, lefts=lefts)
