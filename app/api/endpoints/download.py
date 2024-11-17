@@ -30,6 +30,7 @@ def download(
         torrent_in: schemas.TorrentInfo,
         downloader: str = Body(None),
         save_path: str = Body(None),
+        monitor_type: str = Body(None),
         current_user: User = Depends(get_current_active_user)) -> Any:
     """
     添加下载任务（含媒体信息）
@@ -49,7 +50,8 @@ def download(
         torrent_info=torrentinfo
     )
     did = DownloadChain().download_single(context=context, username=current_user.name,
-                                          downloader=downloader, save_path=save_path)
+                                          downloader=downloader, save_path=save_path,
+                                          monitor_type=monitor_type)
     if not did:
         return schemas.Response(success=False, message="任务添加失败")
     return schemas.Response(success=True, data={
@@ -62,6 +64,7 @@ def add(
         torrent_in: schemas.TorrentInfo,
         downloader: str = Body(None),
         save_path: str = Body(None),
+        monitor_type: str = Body(None),
         current_user: User = Depends(get_current_active_user)) -> Any:
     """
     添加下载任务（不含媒体信息）
@@ -82,7 +85,8 @@ def add(
         torrent_info=torrentinfo
     )
     did = DownloadChain().download_single(context=context, username=current_user.name,
-                                          downloader=downloader, save_path=save_path)
+                                          downloader=downloader, save_path=save_path,
+                                          monitor_type=monitor_type)
     if not did:
         return schemas.Response(success=False, message="任务添加失败")
     return schemas.Response(success=True, data={

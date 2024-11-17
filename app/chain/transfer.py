@@ -150,7 +150,8 @@ class TransferChain(ChainBase):
                       transfer_type: str = None, scrape: bool = None,
                       season: int = None, epformat: EpisodeFormat = None,
                       min_filesize: int = 0, download_hash: str = None,
-                      force: bool = False, src_match: bool = False) -> Tuple[bool, str]:
+                      force: bool = False, src_match: bool = False,
+                      monitor_type: str = None) -> Tuple[bool, str]:
         """
         执行一个复杂目录的整理操作
         :param fileitem: 文件项
@@ -167,6 +168,7 @@ class TransferChain(ChainBase):
         :param download_hash: 下载记录hash
         :param force: 是否强制整理
         :param src_match: 是否源目录匹配
+        :param monitor_type: 监控类型
         返回：成功标识，错误信息
         """
 
@@ -347,7 +349,8 @@ class TransferChain(ChainBase):
                     fileitem=file_item,
                     mode=transfer_type,
                     meta=file_meta,
-                    download_hash=download_hash
+                    download_hash=download_hash,
+                    monitor_type=monitor_type
                 )
                 self.post_message(Notification(
                     mtype=NotificationType.Manual,
@@ -382,22 +385,26 @@ class TransferChain(ChainBase):
             else:
                 episodes_info = None
 
+            download_file = self.downloadhis.get_file_by_fullpath(file_item.path)
             # 获取下载hash
-            if not download_hash:
-                download_file = self.downloadhis.get_file_by_fullpath(file_item.path)
-                if download_file:
-                    download_hash = download_file.download_hash
+            if not download_hash and download_file:
+                download_hash = download_file.download_hash
+            # 获取下载记录中的整理类型
+            monitor_type = monitor_type or (download_file.monitor_type if download_file else None)
 
             # 查询整理目标目录
             if not target_directory:
                 if target_path:
                     target_directory = self.directoryhelper.get_dir(file_mediainfo,
-                                                                    storage=target_storage, dest_path=target_path)
+                                                                    storage=target_storage, dest_path=target_path,
+                                                                    monitor_type=monitor_type)
                 elif src_match:
                     target_directory = self.directoryhelper.get_dir(file_mediainfo,
-                                                                    storage=file_item.storage, src_path=file_path)
+                                                                    storage=file_item.storage, src_path=file_path,
+                                                                    monitor_type=monitor_type)
                 else:
-                    target_directory = self.directoryhelper.get_dir(file_mediainfo)
+                    target_directory = self.directoryhelper.get_dir(file_mediainfo,
+                                                                    monitor_type=monitor_type)
 
             # 执行整理
             transferinfo: TransferInfo = self.transfer(fileitem=file_item,
@@ -423,7 +430,8 @@ class TransferChain(ChainBase):
                     download_hash=download_hash,
                     meta=file_meta,
                     mediainfo=file_mediainfo,
-                    transferinfo=transferinfo
+                    transferinfo=transferinfo,
+                    monitor_type=monitor_type,
                 )
                 # 发送消息
                 self.post_message(Notification(
@@ -465,7 +473,8 @@ class TransferChain(ChainBase):
                 download_hash=download_hash,
                 meta=file_meta,
                 mediainfo=file_mediainfo,
-                transferinfo=transferinfo
+                transferinfo=transferinfo,
+                monitor_type=monitor_type,
             )
 
             # 更新进度
@@ -660,7 +669,8 @@ class TransferChain(ChainBase):
             state, errmsg = self.__do_transfer(fileitem=FileItem(**history.src_fileitem),
                                                mediainfo=mediainfo,
                                                download_hash=history.download_hash,
-                                               force=True)
+                                               force=True,
+                                               monitor_type=history.monitor_type)
             if not state:
                 return False, errmsg
 
@@ -721,6 +731,7 @@ class TransferChain(ChainBase):
                 min_filesize=min_filesize,
                 scrape=scrape,
                 force=force,
+                monitor_type="manual",
             )
             if not state:
                 return False, errmsg
@@ -738,7 +749,8 @@ class TransferChain(ChainBase):
                                                epformat=epformat,
                                                min_filesize=min_filesize,
                                                scrape=scrape,
-                                               force=force)
+                                               force=force,
+                                               monitor_type="manual")
             return state, errmsg
 
     def send_transfer_message(self, meta: MetaBase, mediainfo: MediaInfo,

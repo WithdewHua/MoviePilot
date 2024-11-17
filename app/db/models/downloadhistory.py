@@ -49,6 +49,8 @@ class DownloadHistory(Base):
     note = Column(JSON)
     # 自定义媒体类别
     media_category = Column(String)
+    # 整理类型
+    monitor_type = Column(String)
 
     @staticmethod
     @db_query

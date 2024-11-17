@@ -82,6 +82,8 @@ class Subscribe(Base):
     media_category = Column(String)
     # 过滤规则组
     filter_groups = Column(JSON, default=list)
+    # 整理类型
+    monitor_type = Column(String)
 
     @staticmethod
     @db_query
