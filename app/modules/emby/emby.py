@@ -554,19 +554,25 @@ class Emby:
         if not items:
             return False
         # 收集要刷新的媒体库信息
-        logger.info(f"开始刷新Emby媒体库...")
+        logger.info("开始刷新Emby媒体库...")
         library_ids = []
         for item in items:
             library_id = self.__get_emby_library_id_by_item(item)
             if library_id and library_id not in library_ids:
                 library_ids.append(library_id)
         # 开始刷新媒体库
+        refreshed = False
         if "/" in library_ids:
-            return self.refresh_root_library()
-        for library_id in library_ids:
-            if library_id != "/":
-                return self.__refresh_emby_library_by_id(library_id)
-        logger.info(f"Emby媒体库刷新完成")
+            logger.info("刷新 Emby 所有媒体库")
+            refreshed = self.refresh_root_library()
+        else:
+            for library_id in library_ids:
+                logger.info(f"刷新 Emby 媒体库 {library_id}")
+                if not self.__refresh_emby_library_by_id(library_id):
+                    logger.error(f"刷新 Emby 媒体库 {library_id} 失败")
+                    refreshed = False
+        logger.info("Emby媒体库刷新任务完成")
+        return refreshed
 
     def __get_emby_library_id_by_item(self, item: schemas.RefreshMediaItem) -> Optional[str]:
         """
