@@ -458,6 +458,7 @@ class Plex:
         """
         if not self._plex:
             return False
+        logger.info("开始刷新 Plex 媒体库")
         result_dict = {}
         for item in items:
             file_path = item.target_path
@@ -466,16 +467,17 @@ class Plex:
             if path:
                 result_dict[path.as_posix()] = lib_key
             else:
+                logger.warning(f"未找到 {file_path} 所属的Plex媒体库")
                 result_dict[""] = lib_key
         if "" in result_dict:
             # 如果有匹配失败的,刷新整个库
+            logger.info("刷新 plex 所有媒体库")
             self._plex.library.update()
         else:
             # 否则一个一个刷新
             for path, lib_key in result_dict.items():
                 logger.info(f"刷新媒体库：{lib_key} - {path}")
                 self._plex.query(f'/library/sections/{lib_key}/refresh?path={quote_plus(Path(path).parent.as_posix())}')
-                return None
         return None
 
     @staticmethod
