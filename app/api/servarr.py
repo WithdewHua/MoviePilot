@@ -349,7 +349,7 @@ async def arr_add_movie(_: Annotated[str, Depends(verify_apikey)],
         }
     # 添加订阅
     sid, message = await SubscribeChain().async_add(title=movie.title,
-                                                    year=movie.year,
+                                                    year=str(movie.year),
                                                     mtype=MediaType.MOVIE,
                                                     tmdbid=movie.tmdbId,
                                                     username="Seerr")

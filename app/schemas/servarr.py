@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Optional, Union
 from pydantic import BaseModel, Field
 
 
 class RadarrMovie(BaseModel):
     id: Optional[int] = None
     title: Optional[str] = None
-    year: Optional[str] = None
+    year: Union[str, int, None] = None
     isAvailable: bool = False
     monitored: bool = False
     tmdbId: Optional[int] = None
